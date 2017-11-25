@@ -132,16 +132,17 @@ var Location = function(data) {
                 infowindow.open(map, marker);
             }, 8000);
 
-            // AJAX request to load data from WIkipedia
+            // AJAX request to load data from Wikipedia
             $.ajax({
                 url: wikiUrl,
                 dataType: "jsonp",
                 jsonp: "callback",
                 success: function( response ) {
                     var description = '<p>' + response[2][0] + '</p>';
-                    var url = '<a target="_blank" href="' + response[3] + '">More info</a>'
+                    var url = '<p><a target="_blank" href="' + response[3] + '">More info</a></p>'
+                    var ref = '<p><small>This information is provided by <a href="http://en.wikipedia.org">Wikipedia</a></small></p>'
 
-                    windowContent = windowContent + description + url;
+                    windowContent = windowContent + description + url + ref;
 
                     // Add content from Wikipedia to the infoWindow
                     infowindow.setContent(windowContent);
