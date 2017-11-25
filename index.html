@@ -41,8 +41,8 @@
                 </div>
             </div>
           </form>
-          <ul class="nav nav-sidebar">
-            <li><a href="#"></a></li>
+          <ul class="nav nav-sidebar" data-bind="foreach: markerArray">
+            <li><a href="#" data-bind="text: title, click: show"></a></li>
           </ul>
         </div>
         <!-- Google map placeholder -->
