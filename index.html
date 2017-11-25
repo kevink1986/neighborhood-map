@@ -35,13 +35,13 @@
         <div class="col-sm-3 sidebar active">
           <form class="form-inline" role="search">
             <div class="input-group">
-                <input type="text" class="form-control" placeholder="Search" name="q">
+                <input type="text" class="form-control" placeholder="Search" name="q" data-bind="textInput: filterInput, valueUpdate: 'afterkeydown'">
                 <div class="input-group-btn">
                     <button class="btn btn-default"><i class="glyphicon glyphicon-search"></i></button>
                 </div>
             </div>
           </form>
-          <ul class="nav nav-sidebar" data-bind="foreach: markerArray">
+          <ul class="nav nav-sidebar" data-bind="foreach: locationList">
             <li><a href="#" data-bind="text: title, click: show"></a></li>
           </ul>
         </div>
