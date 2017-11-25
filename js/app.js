@@ -1,4 +1,4 @@
-// Data Model with all locations
+// Data model with all locations
 var locations = [
     {
         title: 'Rotterdam central station',
@@ -107,17 +107,16 @@ var Location = function(data) {
         google.maps.event.trigger(self.marker, 'click');
     };
 
-    // This function populates the infowindow when the marker is clicked. We'll only allow
-    // one infowindow which will open at the marker that is clicked, and populate based
-    // on that markers position.
+    // This function populates the infoWindow when the marker is clicked. Only one infoWindow
+    // can be opened at the same time.
     function populateInfoWindow(marker, infowindow) {
         // Check to make sure the infowindow is not already opened on this marker.
         if (infowindow.marker != marker) {
-            // Clear the infowindow content to give the streetview time to load.
+            // Clear the infowindow content
             infowindow.setContent('');
             infowindow.marker = marker;
 
-            // Make sure the marker property is cleared if the infowindow is closed.
+            // Romove marker if infoWindow is closed
             infowindow.addListener('closeclick', function() {
                 infowindow.marker = null;
             });
@@ -150,7 +149,7 @@ var Location = function(data) {
                     // Open the infowindow on the correct marker
                     infowindow.open(map, marker);
 
-                    // Show location title only if wikipedia does't respond
+                    // Show only the location title if wikipedia does't respond
                     clearTimeout(wikiRequestTimeout);
                 }
             });
@@ -190,7 +189,10 @@ var ViewModel = function() {
         $('.sidebar').toggleClass('active');
     };
 
-    // locations viewed on map
+    // List of all locations that meet the filter condition. The filter is
+    // converted to a lowercase string. This filter string is compared
+    // with the title of the location. All locations that contain the
+    // filter string are shown.
     this.locationList = ko.computed(function() {
         var filter = self.filterInput().toLowerCase();
         if (filter) {
@@ -211,6 +213,6 @@ var ViewModel = function() {
 
 // This function shows an error message when google maps cannot be loaded.
 function mapsError() {
-    $('#errorModal').modal('show')
-};
+    $('#errorModal').modal('show');
+}
 
