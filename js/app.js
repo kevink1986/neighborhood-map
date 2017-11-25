@@ -1,11 +1,47 @@
 // Data Model with all locations
 var locations = [
-    {title: 'Vroezenpark', location: {lat: 51.9312578, lng: 4.4512105}},
-    {title: 'Bokaal', location: {lat: 51.9224774, lng: 4.4861631}},
-    {title: 'Witte de Withstraat', location: {lat: 51.91571, lng: 4.4752851}},
-    {title: 'Erasmusbrug', location: {lat: 51.909004, lng: 4.4849287}},
-    {title: 'De Kuip', location: {lat: 51.8939035, lng: 4.5209414}},
-    {title: 'Erasmus University', location: {lat: 51.91752, lng: 4.523391}}
+    {
+        title: 'Rotterdam central station',
+        location: {
+            lat: 51.924482,
+            lng: 4.469478
+        }
+    },
+    {
+        title: 'Cube Houses',
+        location: {
+            lat: 51.920158,
+            lng: 4.490702
+        }
+    },
+    {
+        title: 'Diergaarde Blijdorp',
+        location: {
+            lat: 51.927354,
+            lng: 4.449141
+        }
+    },
+    {
+        title: 'Erasmusbrug',
+        location: {
+            lat: 51.909004,
+            lng: 4.487123
+        }
+    },
+    {
+        title: 'Maritime Museum Rotterdam',
+        location: {
+            lat: 51.917526,
+            lng: 4.482227
+        }
+    },
+    {
+        title: 'Erasmus University',
+        location: {
+            lat: 51.917520,
+            lng: 4.525585
+        }
+    }
 ];
 
 // Global variables
@@ -23,7 +59,10 @@ function initMap() {
         mapTypeControl: false
     });
 
-    infoWindow = new google.maps.InfoWindow();
+    infoWindow = new google.maps.InfoWindow({
+        maxWidth: 200
+    });
+
     bounds = new google.maps.LatLngBounds();
 
     ko.applyBindings(new ViewModel());
@@ -117,12 +156,13 @@ function populateInfoWindow(marker, infowindow) {
         });
 
         // Create the infowindow content for this marker
-        infowindow.setContent('<h4>' + marker.title + '</h4>');
+        var windowContent = '<h4>' + marker.title + '</h4>';
 
         // load wikipedia data
         var wikiUrl = 'http://en.wikipedia.org/w/api.php?action=opensearch&search=' + marker.title + '&format=json&callback=wikiCallback';
         var wikiRequestTimeout = setTimeout(function(){
-            $wikiElem.text("failed to get wikipedia resources");
+            infowindow.setContent(windowContent);
+            infowindow.open(map, marker);
         }, 8000);
 
         $.ajax({
@@ -130,20 +170,22 @@ function populateInfoWindow(marker, infowindow) {
             dataType: "jsonp",
             jsonp: "callback",
             success: function( response ) {
-                var articleList = response[1];
+                var description = '<p>' + response[2][0] + '</p>';
+                var url = '<a target="_blank" href="' + response[3] + '">More info</a>'
 
-                for (var i = 0; i < articleList.length; i++) {
-                    articleStr = articleList[i];
-                    var url = 'http://en.wikipedia.org/wiki/' + articleStr;
-                    $wikiElem.append('<li><a href="' + url + '">' + articleStr + '</a></li>');
-                };
+                windowContent = windowContent + description + url;
 
+                // Add content from Wikipedia to the infoWindow
+                infowindow.setContent(windowContent);
+
+                // Open the infowindow on the correct marker
+                infowindow.open(map, marker);
+
+                // Show location title only if wikipedia does't respond
                 clearTimeout(wikiRequestTimeout);
             }
         });
 
-        // Open the infowindow on the correct marker.
-        infowindow.open(map, marker);
     }
 }
 
@@ -159,7 +201,6 @@ function toggleBounce(marker) {
         }, 2100);
     }
 }
-
 
 
 // This function shows an error message when google maps cannot be loaded.
