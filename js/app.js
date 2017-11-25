@@ -38,18 +38,11 @@ var Location = function(data) {
 
     this.visible = ko.observable(true);
 
-    // Style the markers a bit. This will be our listing marker icon.
-    var defaultIcon = makeMarkerIcon('333333');
-    // Create a "highlighted location" marker color for when the user
-    // mouses over the marker.
-    var highlightedIcon = makeMarkerIcon('FF0000');
-
     // Create a marker per location, and put into markers array
     this.marker = new google.maps.Marker({
         position: this.position,
         title: this.title,
-        animation: google.maps.Animation.DROP,
-        icon: defaultIcon
+        animation: google.maps.Animation.DROP
     });
 
     self.filterMarkers = ko.computed(function () {
@@ -68,15 +61,6 @@ var Location = function(data) {
         populateInfoWindow(this, infoWindow);
         map.panTo(this.getPosition());
         toggleBounce(this);
-    });
-
-    // Two event listeners - one for mouseover, one for mouseout,
-    // to change the colors back and forth.
-    this.marker.addListener('mouseover', function() {
-        this.setIcon(highlightedIcon);
-    });
-    this.marker.addListener('mouseout', function() {
-        this.setIcon(defaultIcon);
     });
 
     // show item info when selected from list
@@ -135,25 +119,34 @@ function populateInfoWindow(marker, infowindow) {
         // Create the infowindow content for this marker
         infowindow.setContent('<h4>' + marker.title + '</h4>');
 
+        // load wikipedia data
+        var wikiUrl = 'http://en.wikipedia.org/w/api.php?action=opensearch&search=' + marker.title + '&format=json&callback=wikiCallback';
+        var wikiRequestTimeout = setTimeout(function(){
+            $wikiElem.text("failed to get wikipedia resources");
+        }, 8000);
+
+        $.ajax({
+            url: wikiUrl,
+            dataType: "jsonp",
+            jsonp: "callback",
+            success: function( response ) {
+                var articleList = response[1];
+
+                for (var i = 0; i < articleList.length; i++) {
+                    articleStr = articleList[i];
+                    var url = 'http://en.wikipedia.org/wiki/' + articleStr;
+                    $wikiElem.append('<li><a href="' + url + '">' + articleStr + '</a></li>');
+                };
+
+                clearTimeout(wikiRequestTimeout);
+            }
+        });
+
         // Open the infowindow on the correct marker.
         infowindow.open(map, marker);
     }
 }
 
-
-// This function takes in a COLOR, and then creates a new marker
-// icon of that color. The icon will be 21 px wide by 34 high, have an origin
-// of 0, 0 and be anchored at 10, 34).
-function makeMarkerIcon(markerColor) {
-    var markerImage = new google.maps.MarkerImage(
-        'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|' + markerColor +
-        '|40|_|%E2%80%A2',
-        new google.maps.Size(21, 34),
-        new google.maps.Point(0, 0),
-        new google.maps.Point(10, 34),
-        new google.maps.Size(21, 34));
-    return markerImage;
-}
 
 // This function makes a marker on the map bounce
 function toggleBounce(marker) {
@@ -165,4 +158,11 @@ function toggleBounce(marker) {
             marker.setAnimation(null);
         }, 2100);
     }
+}
+
+
+
+// This function shows an error message when google maps cannot be loaded.
+function mapsError() {
+    $('#errorModal').modal('show')
 }
