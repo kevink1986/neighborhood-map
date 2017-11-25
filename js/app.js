@@ -138,8 +138,8 @@ var Location = function(data) {
                 jsonp: "callback",
                 success: function( response ) {
                     var description = '<p>' + response[2][0] + '</p>';
-                    var url = '<p><a target="_blank" href="' + response[3] + '">More info</a></p>'
-                    var ref = '<p><small>This information is provided by <a href="http://en.wikipedia.org">Wikipedia</a></small></p>'
+                    var url = '<p><a target="_blank" href="' + response[3] + '">More info</a></p>';
+                    var ref = '<p><small>This information is provided by <a href="http://en.wikipedia.org">Wikipedia</a></small></p>';
 
                     windowContent = windowContent + description + url + ref;
 
