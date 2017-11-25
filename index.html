@@ -17,7 +17,7 @@
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" id="sidebarCollapse">
+          <button type="button" class="navbar-toggle collapsed" id="sidebarCollapse" data-bind="click: toggleSidebar">
             <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -47,7 +47,7 @@
         </div>
         <!-- Sidebar -->
         <div class="col-sm-3 sidebar active">
-          <form class="form-inline" role="search">
+          <form class="form-inline search" role="search">
             <div class="input-group">
                 <input type="text" class="form-control" placeholder="Search" name="q" data-bind="textInput: filterInput, valueUpdate: 'afterkeydown'">
                 <div class="input-group-btn">
@@ -56,7 +56,7 @@
             </div>
           </form>
           <ul class="nav nav-sidebar" data-bind="foreach: locationList">
-            <li><a href="#" data-bind="text: title, click: show"></a></li>
+            <li><a href="#" data-bind="text: title, click: selectLocation"></a></li>
           </ul>
         </div>
         <!-- Google map placeholder -->

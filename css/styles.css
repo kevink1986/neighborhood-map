@@ -14,7 +14,7 @@ body {
         margin-right: -21px;
     }
     .nav-sidebar > li > a {
-        padding-left: 20px;
+        padding-left: 32px;
         padding-right: 20px;
     }
     .nav-sidebar > .active > a, .nav-sidebar > .active > a:hover, .nav-sidebar > .active > a:focus {
@@ -30,6 +30,7 @@ body {
         top: 50px;
         width: 100%;
     }
+
     #map {
         height: 100%;
 
@@ -48,9 +49,15 @@ body {
         z-index: 1000;
         width: 252px;
     }
+
     .sidebar.active {
         left: 0;
     }
+
+    .search {
+        margin-bottom: 20px;
+    }
+
     @media (min-width: 768px) {
         .sidebar {
             width: 25%;

@@ -77,14 +77,14 @@ var Location = function(data) {
 
     this.visible = ko.observable(true);
 
-    // Create a marker per location, and put into markers array
+    // Create a marker per location
     this.marker = new google.maps.Marker({
         position: this.position,
         title: this.title,
         animation: google.maps.Animation.DROP
     });
 
-    self.filterMarkers = ko.computed(function () {
+    self.markers = ko.computed(function () {
         // Set markers and adjust bounds
         if(self.visible() === true) {
             self.marker.setMap(map);
@@ -95,17 +95,80 @@ var Location = function(data) {
         }
     });
 
-    // Create an onclick even to open an indowindow at each marker
+    // Add onClick event to open infoWindow for each marker
     this.marker.addListener('click', function() {
         populateInfoWindow(this, infoWindow);
         map.panTo(this.getPosition());
         toggleBounce(this);
     });
 
-    // show item info when selected from list
-    this.show = function(location) {
+    // Show item on the map when it is selected in the list in the sidebar
+    this.selectLocation = function(clickedLocation) {
         google.maps.event.trigger(self.marker, 'click');
     };
+
+    // This function populates the infowindow when the marker is clicked. We'll only allow
+    // one infowindow which will open at the marker that is clicked, and populate based
+    // on that markers position.
+    function populateInfoWindow(marker, infowindow) {
+        // Check to make sure the infowindow is not already opened on this marker.
+        if (infowindow.marker != marker) {
+            // Clear the infowindow content to give the streetview time to load.
+            infowindow.setContent('');
+            infowindow.marker = marker;
+
+            // Make sure the marker property is cleared if the infowindow is closed.
+            infowindow.addListener('closeclick', function() {
+                infowindow.marker = null;
+            });
+
+            // Create the infowindow content for this marker
+            var windowContent = '<h4>' + marker.title + '</h4>';
+
+            // load wikipedia data
+            var wikiUrl = 'http://en.wikipedia.org/w/api.php?action=opensearch&search=' + marker.title + '&format=json&callback=wikiCallback';
+            var wikiRequestTimeout = setTimeout(function(){
+                infowindow.setContent(windowContent);
+                infowindow.open(map, marker);
+            }, 8000);
+
+            // AJAX request to load data from WIkipedia
+            $.ajax({
+                url: wikiUrl,
+                dataType: "jsonp",
+                jsonp: "callback",
+                success: function( response ) {
+                    var description = '<p>' + response[2][0] + '</p>';
+                    var url = '<a target="_blank" href="' + response[3] + '">More info</a>'
+
+                    windowContent = windowContent + description + url;
+
+                    // Add content from Wikipedia to the infoWindow
+                    infowindow.setContent(windowContent);
+
+                    // Open the infowindow on the correct marker
+                    infowindow.open(map, marker);
+
+                    // Show location title only if wikipedia does't respond
+                    clearTimeout(wikiRequestTimeout);
+                }
+            });
+
+        }
+    }
+
+    // This function makes a marker on the map bounce
+    function toggleBounce(marker) {
+        if (marker.getAnimation() !== null) {
+            marker.setAnimation(null);
+        } else {
+            marker.setAnimation(google.maps.Animation.BOUNCE);
+            setTimeout(function() {
+                marker.setAnimation(null);
+            }, 2100);
+        }
+    }
+
 };
 
 // ViewModel code
@@ -120,6 +183,11 @@ var ViewModel = function() {
     locations.forEach(function(locationItem) {
         self.markerArray.push( new Location(locationItem) );
     });
+
+    // Toggle sidebar to show or hide the sidebar on a small screen
+    this.toggleSidebar = function() {
+        $('.sidebar').toggleClass('active');
+    };
 
     // locations viewed on map
     this.locationList = ko.computed(function() {
@@ -140,70 +208,8 @@ var ViewModel = function() {
     }, self);
 };
 
-// This function populates the infowindow when the marker is clicked. We'll only allow
-// one infowindow which will open at the marker that is clicked, and populate based
-// on that markers position.
-function populateInfoWindow(marker, infowindow) {
-    // Check to make sure the infowindow is not already opened on this marker.
-    if (infowindow.marker != marker) {
-        // Clear the infowindow content to give the streetview time to load.
-        infowindow.setContent('');
-        infowindow.marker = marker;
-
-        // Make sure the marker property is cleared if the infowindow is closed.
-        infowindow.addListener('closeclick', function() {
-            infowindow.marker = null;
-        });
-
-        // Create the infowindow content for this marker
-        var windowContent = '<h4>' + marker.title + '</h4>';
-
-        // load wikipedia data
-        var wikiUrl = 'http://en.wikipedia.org/w/api.php?action=opensearch&search=' + marker.title + '&format=json&callback=wikiCallback';
-        var wikiRequestTimeout = setTimeout(function(){
-            infowindow.setContent(windowContent);
-            infowindow.open(map, marker);
-        }, 8000);
-
-        $.ajax({
-            url: wikiUrl,
-            dataType: "jsonp",
-            jsonp: "callback",
-            success: function( response ) {
-                var description = '<p>' + response[2][0] + '</p>';
-                var url = '<a target="_blank" href="' + response[3] + '">More info</a>'
-
-                windowContent = windowContent + description + url;
-
-                // Add content from Wikipedia to the infoWindow
-                infowindow.setContent(windowContent);
-
-                // Open the infowindow on the correct marker
-                infowindow.open(map, marker);
-
-                // Show location title only if wikipedia does't respond
-                clearTimeout(wikiRequestTimeout);
-            }
-        });
-
-    }
-}
-
-
-// This function makes a marker on the map bounce
-function toggleBounce(marker) {
-    if (marker.getAnimation() !== null) {
-        marker.setAnimation(null);
-    } else {
-        marker.setAnimation(google.maps.Animation.BOUNCE);
-        setTimeout(function() {
-            marker.setAnimation(null);
-        }, 2100);
-    }
-}
-
-
 // This function shows an error message when google maps cannot be loaded.
 function mapsError() {
     $('#errorModal').modal('show')
-}
+};
+
