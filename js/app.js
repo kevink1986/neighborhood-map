@@ -65,6 +65,11 @@ function initMap() {
 
     bounds = new google.maps.LatLngBounds();
 
+    // This listener resizes the map when the window is adjusted
+    google.maps.event.addDomListener(window, 'resize', function() {
+        map.fitBounds(bounds);
+    });
+
     ko.applyBindings(new ViewModel());
 }
 
@@ -183,6 +188,12 @@ var ViewModel = function() {
     locations.forEach(function(locationItem) {
         self.markerArray.push( new Location(locationItem) );
     });
+
+    this.activeSidebar = ko.observable(false);
+
+    this.toggleSidebar = function() {
+        self.activeSidebar(!self.activeSidebar());
+    };
 
     // Toggle sidebar to show or hide the sidebar on a small screen
     this.toggleSidebar = function() {
