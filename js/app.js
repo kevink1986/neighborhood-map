@@ -131,10 +131,6 @@ var Location = function(data) {
 
             // load wikipedia data
             var wikiUrl = 'http://en.wikipedia.org/w/api.php?action=opensearch&search=' + marker.title + '&format=json&callback=wikiCallback';
-            var wikiRequestTimeout = setTimeout(function(){
-                infowindow.setContent(windowContent);
-                infowindow.open(map, marker);
-            }, 8000);
 
             // AJAX request to load data from Wikipedia
             $.ajax({
@@ -153,10 +149,19 @@ var Location = function(data) {
 
                     // Open the infowindow on the correct marker
                     infowindow.open(map, marker);
-
-                    // Show only the location title if wikipedia does't respond
-                    clearTimeout(wikiRequestTimeout);
                 }
+            }).done(function (data) {
+                // successful
+            }).fail(function (jqXHR, textStatus) {
+                var wikiError = '<p>Sorry, we cannot load additional information at this moment. It seems like the wikipedia service is down.</p>';
+
+                windowContent = windowContent + wikiError;
+
+                // Add content from Wikipedia to the infoWindow
+                infowindow.setContent(windowContent);
+
+                // Open the infowindow on the correct marker
+                infowindow.open(map, marker);
             });
 
         }
